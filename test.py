@@ -8,7 +8,7 @@ import time
 
 from modules.models import RetinaFaceModel
 from modules.utils import (set_memory_growth, load_yaml, draw_bbox_landm,
-                           pad_input_image, recover_pad_output, crop_image)
+                           pad_input_image, recover_pad_output)
 
 
 flags.DEFINE_string('cfg_path', './configs/retinaface_res50.yaml',
@@ -74,12 +74,13 @@ def main(_argv):
         # recover padding effect
         outputs = recover_pad_output(outputs, pad_params)
 
-        # draw and save results        
-        print(f"[*] saving {len(outputs)} results")
+        # draw and save results
+        save_img_path = os.path.join('out_' + os.path.basename(FLAGS.img_path))
         for prior_index in range(len(outputs)):
-            crop_img = crop_image(img_raw, outputs[prior_index], img_height_raw, img_width_raw)
-            save_img_path = os.path.join('out/' + os.path.basename(f'out_{prior_index}.jpg'))
-            cv2.imwrite(save_img_path, crop_img)
+            draw_bbox_landm(img_raw, outputs[prior_index], img_height_raw,
+                            img_width_raw)
+            cv2.imwrite(save_img_path, img_raw)
+        print(f"[*] save result at {save_img_path}")
 
     else:
         cam = cv2.VideoCapture(0)
